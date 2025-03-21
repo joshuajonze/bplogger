@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { format } from 'date-fns';
 
@@ -16,10 +16,18 @@ interface TrendsTabProps {
   readings: BPReading[];
 }
 
-const TrendsTab: React.FC<TrendsTabProps> = ({ readings }) => {
-  const [chartData, setChartData] = useState<any[]>([]);
+// Define chart data type
+interface ChartDataPoint {
+  date: string;
+  dateObj: Date;
+  systolic: number;
+  diastolic: number;
+  pulse: number;
+}
 
-  // Solution 1: Define prepareChartData inside useEffect
+const TrendsTab: React.FC<TrendsTabProps> = ({ readings }) => {
+  const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
+
   useEffect(() => {
     if (readings.length > 0) {
       // Move the function inside useEffect to avoid the dependency warning
