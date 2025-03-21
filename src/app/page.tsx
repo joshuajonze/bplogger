@@ -108,7 +108,8 @@ export default function Home() {
         throw new Error('Failed to save reading');
       }
 
-      const savedReading = await response.json();
+      // Remove the unused variable
+      await response.json();
       
       // Reset form
       setSystolic('');
@@ -127,14 +128,14 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-900 text-white p-6">
+    <main className="min-h-screen bg-gray-900 text-white p-4 sm:p-6">
       <div className="max-w-7xl mx-auto">
-        <header className="mb-8 flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold">Blood Pressure Tracker</h1>
-            <p className="text-gray-400">Track and monitor your blood pressure readings over time</p>
+        <header className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-center">
+          <div className="mb-4 sm:mb-0">
+            <h1 className="text-2xl sm:text-3xl font-bold">Blood Pressure Tracker</h1>
+            <p className="text-gray-400 text-sm sm:text-base">Track and monitor your blood pressure readings over time</p>
           </div>
-          <button className="p-2 bg-gray-800 rounded-full">
+          <button className="p-2 bg-gray-800 rounded-full self-end sm:self-auto">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
               <circle cx="12" cy="12" r="5"></circle>
               <path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"></path>
@@ -142,31 +143,31 @@ export default function Home() {
           </button>
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
           {/* Add New Reading Panel */}
-          <div className="bg-gray-800 p-6 rounded-lg">
+          <div className="bg-gray-800 p-4 sm:p-6 rounded-lg">
             <h2 className="text-xl font-bold mb-2">Add New Reading</h2>
-            <p className="text-gray-400 mb-4">Record your latest blood pressure measurement</p>
+            <p className="text-gray-400 text-sm mb-4">Record your latest blood pressure measurement</p>
             
-            <form onSubmit={handleSaveReading}>
-              <div className="grid grid-cols-2 gap-4 mb-4">
+            <form onSubmit={handleSaveReading} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="systolic" className="block mb-2">Systolic (mmHg)</label>
+                  <label htmlFor="systolic" className="block mb-1 sm:mb-2 text-sm">Systolic (mmHg)</label>
                   <input 
                     type="number" 
                     id="systolic" 
-                    className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white" 
+                    className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white text-base" 
                     value={systolic}
                     onChange={(e) => setSystolic(e.target.value)}
                     placeholder="120"
                   />
                 </div>
                 <div>
-                  <label htmlFor="diastolic" className="block mb-2">Diastolic (mmHg)</label>
+                  <label htmlFor="diastolic" className="block mb-1 sm:mb-2 text-sm">Diastolic (mmHg)</label>
                   <input 
                     type="number" 
                     id="diastolic" 
-                    className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white" 
+                    className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white text-base" 
                     value={diastolic}
                     onChange={(e) => setDiastolic(e.target.value)}
                     placeholder="80"
@@ -174,46 +175,46 @@ export default function Home() {
                 </div>
               </div>
               
-              <div className="mb-4">
-                <label htmlFor="pulse" className="block mb-2">Pulse (bpm)</label>
+              <div>
+                <label htmlFor="pulse" className="block mb-1 sm:mb-2 text-sm">Pulse (bpm)</label>
                 <input 
                   type="number" 
                   id="pulse" 
-                  className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white" 
+                  className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white text-base" 
                   value={pulse}
                   onChange={(e) => setPulse(e.target.value)}
                   placeholder="72"
                 />
               </div>
               
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="date" className="block mb-2">Date</label>
+                  <label htmlFor="date" className="block mb-1 sm:mb-2 text-sm">Date</label>
                   <input 
                     type="date" 
                     id="date" 
-                    className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white" 
+                    className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white text-base" 
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
                   />
                 </div>
                 <div>
-                  <label htmlFor="time" className="block mb-2">Time</label>
+                  <label htmlFor="time" className="block mb-1 sm:mb-2 text-sm">Time</label>
                   <input 
                     type="time" 
                     id="time" 
-                    className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white" 
+                    className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white text-base" 
                     value={time}
                     onChange={(e) => setTime(e.target.value)}
                   />
                 </div>
               </div>
               
-              <div className="mb-4">
-                <label htmlFor="notes" className="block mb-2">Notes (optional)</label>
+              <div>
+                <label htmlFor="notes" className="block mb-1 sm:mb-2 text-sm">Notes (optional)</label>
                 <textarea 
                   id="notes" 
-                  className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white h-24" 
+                  className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white h-20 sm:h-24 text-base" 
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Any additional information..."
@@ -222,7 +223,7 @@ export default function Home() {
               
               <button 
                 type="submit" 
-                className="w-full bg-blue-600 text-white font-medium py-2 px-4 rounded hover:bg-blue-700 transition"
+                className="w-full bg-blue-600 text-white font-medium py-3 px-4 rounded hover:bg-blue-700 transition text-base"
               >
                 Save Reading
               </button>
@@ -230,41 +231,41 @@ export default function Home() {
           </div>
           
           {/* Latest Reading Panel */}
-          <div className="bg-gray-800 p-6 rounded-lg">
+          <div className="bg-gray-800 p-4 sm:p-6 rounded-lg">
             <h2 className="text-xl font-bold mb-2">Latest Reading</h2>
-            <p className="text-gray-400 mb-4">Your most recent blood pressure measurement</p>
+            <p className="text-gray-400 text-sm mb-4">Your most recent blood pressure measurement</p>
             
             {latestReading ? (
               <div>
-                <div className="flex items-center justify-between mb-4">
+                <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-4">
                   <div>
-                    <p className="text-gray-400">Systolic</p>
-                    <p className="text-2xl font-bold">{latestReading.systolic} <span className="text-sm text-gray-400">mmHg</span></p>
+                    <p className="text-gray-400 text-xs sm:text-sm">Systolic</p>
+                    <p className="text-xl sm:text-2xl font-bold">{latestReading.systolic} <span className="text-xs text-gray-400">mmHg</span></p>
                   </div>
                   <div>
-                    <p className="text-gray-400">Diastolic</p>
-                    <p className="text-2xl font-bold">{latestReading.diastolic} <span className="text-sm text-gray-400">mmHg</span></p>
+                    <p className="text-gray-400 text-xs sm:text-sm">Diastolic</p>
+                    <p className="text-xl sm:text-2xl font-bold">{latestReading.diastolic} <span className="text-xs text-gray-400">mmHg</span></p>
                   </div>
                   <div>
-                    <p className="text-gray-400">Pulse</p>
-                    <p className="text-2xl font-bold">{latestReading.pulse || '-'} <span className="text-sm text-gray-400">bpm</span></p>
+                    <p className="text-gray-400 text-xs sm:text-sm">Pulse</p>
+                    <p className="text-xl sm:text-2xl font-bold">{latestReading.pulse || '-'} <span className="text-xs text-gray-400">bpm</span></p>
                   </div>
                 </div>
                 
                 <div className="mb-4">
-                  <p className="text-gray-400">Category</p>
-                  <p className="text-xl font-medium">{getBPCategory(latestReading.systolic, latestReading.diastolic)}</p>
+                  <p className="text-gray-400 text-xs sm:text-sm">Category</p>
+                  <p className="text-lg sm:text-xl font-medium">{getBPCategory(latestReading.systolic, latestReading.diastolic)}</p>
                 </div>
                 
                 <div className="mb-4">
-                  <p className="text-gray-400">Date & Time</p>
-                  <p className="text-lg">{format(new Date(latestReading.measuredAt), 'MMM d, yyyy h:mm a')}</p>
+                  <p className="text-gray-400 text-xs sm:text-sm">Date & Time</p>
+                  <p className="text-base sm:text-lg">{format(new Date(latestReading.measuredAt), 'MMM d, yyyy h:mm a')}</p>
                 </div>
                 
                 {latestReading.notes && (
                   <div>
-                    <p className="text-gray-400">Notes</p>
-                    <p className="text-gray-200">{latestReading.notes}</p>
+                    <p className="text-gray-400 text-xs sm:text-sm">Notes</p>
+                    <p className="text-gray-200 text-sm sm:text-base">{latestReading.notes}</p>
                   </div>
                 )}
               </div>
@@ -280,7 +281,7 @@ export default function Home() {
         <div className="bg-gray-800 rounded-lg overflow-hidden">
           <div className="flex border-b border-gray-700">
             <button
-              className={`flex-1 py-3 px-4 text-center font-medium ${
+              className={`flex-1 py-2 sm:py-3 px-4 text-center font-medium text-sm sm:text-base ${
                 activeTab === 'history' ? 'bg-gray-700' : 'bg-gray-800 hover:bg-gray-700'
               }`}
               onClick={() => setActiveTab('history')}
@@ -288,7 +289,7 @@ export default function Home() {
               History
             </button>
             <button
-              className={`flex-1 py-3 px-4 text-center font-medium ${
+              className={`flex-1 py-2 sm:py-3 px-4 text-center font-medium text-sm sm:text-base ${
                 activeTab === 'trends' ? 'bg-gray-700' : 'bg-gray-800 hover:bg-gray-700'
               }`}
               onClick={() => setActiveTab('trends')}

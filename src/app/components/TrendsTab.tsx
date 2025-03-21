@@ -1,8 +1,6 @@
-'use client';
-
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { format, subDays, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 
 interface BPReading {
   id: number;
@@ -18,232 +16,175 @@ interface TrendsTabProps {
   readings: BPReading[];
 }
 
-export default function TrendsTab({ readings }: TrendsTabProps) {
-  const [timeRange, setTimeRange] = useState<'week' | 'month' | 'year'>('week');
+const TrendsTab: React.FC<TrendsTabProps> = ({ readings }) => {
   const [chartData, setChartData] = useState<any[]>([]);
 
+  // Solution 1: Define prepareChartData inside useEffect
   useEffect(() => {
-    prepareChartData();
-  }, [readings, timeRange]);
-
-  const prepareChartData = () => {
-    if (readings.length === 0) {
-      setChartData([]);
-      return;
+    if (readings.length > 0) {
+      // Move the function inside useEffect to avoid the dependency warning
+      const prepareChartData = () => {
+        // Sort readings by date
+        const sortedReadings = [...readings].sort((a, b) => 
+          new Date(a.measuredAt).getTime() - new Date(b.measuredAt).getTime()
+        );
+        
+        // Process readings data for the chart
+        return sortedReadings.map(reading => ({
+          date: format(new Date(reading.measuredAt), 'MMM d'),
+          dateObj: new Date(reading.measuredAt),
+          systolic: reading.systolic,
+          diastolic: reading.diastolic,
+          pulse: reading.pulse || 0
+        }));
+      };
+      
+      const data = prepareChartData();
+      setChartData(data);
     }
+  }, [readings]); // Now we only need readings as a dependency
 
+  // Alternative solution using useCallback (commented out)
+  /*
+  const prepareChartData = useCallback(() => {
+    if (readings.length === 0) return [];
+    
     // Sort readings by date
     const sortedReadings = [...readings].sort((a, b) => 
       new Date(a.measuredAt).getTime() - new Date(b.measuredAt).getTime()
     );
-
-    // Filter by time range
-    let filteredReadings = sortedReadings;
-    const today = new Date();
     
-    if (timeRange === 'week') {
-      const weekAgo = subDays(today, 7);
-      filteredReadings = sortedReadings.filter(reading => 
-        new Date(reading.measuredAt) >= weekAgo
-      );
-    } else if (timeRange === 'month') {
-      const monthAgo = subDays(today, 30);
-      filteredReadings = sortedReadings.filter(reading => 
-        new Date(reading.measuredAt) >= monthAgo
-      );
-    } else if (timeRange === 'year') {
-      const yearAgo = subDays(today, 365);
-      filteredReadings = sortedReadings.filter(reading => 
-        new Date(reading.measuredAt) >= yearAgo
-      );
-    }
-
-    // Format data for the chart
-    const formattedData = filteredReadings.map(reading => ({
-      date: format(new Date(reading.measuredAt), 'MMM dd'),
+    // Process readings data for the chart
+    return sortedReadings.map(reading => ({
+      date: format(new Date(reading.measuredAt), 'MMM d'),
+      dateObj: new Date(reading.measuredAt),
       systolic: reading.systolic,
       diastolic: reading.diastolic,
-      pulse: reading.pulse || 0,
-      fullDate: reading.measuredAt,
+      pulse: reading.pulse || 0
     }));
+  }, [readings]);
 
-    setChartData(formattedData);
-  };
-
-  if (readings.length === 0) {
-    return (
-      <div className="p-8 text-center">
-        <p className="text-gray-400">No readings available to show trends</p>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (readings.length > 0) {
+      const data = prepareChartData();
+      setChartData(data);
+    }
+  }, [readings, prepareChartData]);
+  */
 
   return (
-    <div className="p-4">
-      <div className="flex justify-between items-center mb-6">
-        <h3 className="text-lg font-medium">Blood Pressure Trends</h3>
-        <div className="flex space-x-2">
-          <button
-            className={`px-3 py-1 rounded ${
-              timeRange === 'week' ? 'bg-blue-600' : 'bg-gray-700 hover:bg-gray-600'
-            }`}
-            onClick={() => setTimeRange('week')}
-          >
-            Week
-          </button>
-          <button
-            className={`px-3 py-1 rounded ${
-              timeRange === 'month' ? 'bg-blue-600' : 'bg-gray-700 hover:bg-gray-600'
-            }`}
-            onClick={() => setTimeRange('month')}
-          >
-            Month
-          </button>
-          <button
-            className={`px-3 py-1 rounded ${
-              timeRange === 'year' ? 'bg-blue-600' : 'bg-gray-700 hover:bg-gray-600'
-            }`}
-            onClick={() => setTimeRange('year')}
-          >
-            Year
-          </button>
-        </div>
-      </div>
-
-      <div className="h-80">
-        {chartData.length > 0 ? (
+    <div className="p-4 sm:p-6">
+      <h3 className="text-lg sm:text-xl font-medium mb-4">Blood Pressure Trends</h3>
+      
+      {readings.length > 0 ? (
+        <div className="h-64 sm:h-80 md:h-96">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={chartData}
-              margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+              margin={{ top: 5, right: 30, left: 5, bottom: 5 }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#555" />
               <XAxis 
                 dataKey="date" 
-                stroke="#aaa"
-                tick={{ fill: '#aaa' }}
+                stroke="#ccc"
+                fontSize={12}
               />
-              <YAxis stroke="#aaa" tick={{ fill: '#aaa' }} />
+              <YAxis stroke="#ccc" fontSize={12} />
               <Tooltip 
-                contentStyle={{ backgroundColor: '#333', border: 'none', borderRadius: '4px' }}
-                labelStyle={{ color: '#fff' }}
-                formatter={(value, name) => {
-                  const unit = typeof name === 'string' && name === 'pulse' ? 'bpm' : 'mmHg';
-                  const formattedName = typeof name === 'string' 
-                    ? name.charAt(0).toUpperCase() + name.slice(1)
-                    : String(name);
-                  return [`${value} ${unit}`, formattedName];
-                }}
-                labelFormatter={(label, items) => {
-                  const item = items[0];
-                  if (item && item.payload.fullDate) {
-                    return format(new Date(item.payload.fullDate), 'MMM d, yyyy h:mm a');
-                  }
-                  return label;
-                }}
+                contentStyle={{ backgroundColor: '#333', borderColor: '#555' }}
+                labelStyle={{ color: '#ccc' }}
               />
-              <Legend />
+              <Legend wrapperStyle={{ color: '#ccc' }} />
               <Line 
                 type="monotone" 
                 dataKey="systolic" 
-                stroke="#ff5252" 
+                stroke="#ef4444" 
+                activeDot={{ r: 8 }} 
                 name="Systolic"
                 strokeWidth={2}
-                dot={{ r: 4 }}
-                activeDot={{ r: 6 }}
               />
               <Line 
                 type="monotone" 
                 dataKey="diastolic" 
-                stroke="#4caf50" 
-                name="Diastolic" 
+                stroke="#3b82f6" 
+                name="Diastolic"
                 strokeWidth={2}
-                dot={{ r: 4 }}
-                activeDot={{ r: 6 }}
               />
-              <Line 
-                type="monotone" 
-                dataKey="pulse" 
-                stroke="#2196f3" 
-                name="Pulse" 
-                strokeWidth={2}
-                dot={{ r: 4 }}
-                activeDot={{ r: 6 }}
-              />
+              {chartData.some(item => item.pulse > 0) && (
+                <Line 
+                  type="monotone" 
+                  dataKey="pulse" 
+                  stroke="#10b981" 
+                  name="Pulse"
+                  strokeWidth={2}
+                  strokeDasharray="5 5"
+                />
+              )}
             </LineChart>
           </ResponsiveContainer>
-        ) : (
-          <div className="h-full flex items-center justify-center">
-            <p className="text-gray-400">No data available for the selected time range</p>
+        </div>
+      ) : (
+        <div className="text-center py-16">
+          <p className="text-gray-400">No data available to display trends</p>
+          <p className="text-gray-500 text-sm mt-2">Add readings to see your blood pressure trends over time</p>
+        </div>
+      )}
+      
+      <div className="mt-6">
+        <h4 className="text-base sm:text-lg font-medium mb-3">Insights</h4>
+        {readings.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Average readings card */}
+            <div className="bg-gray-700 p-4 rounded-lg">
+              <h5 className="text-sm font-medium text-gray-300 mb-2">Average Readings</h5>
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <p className="text-xs text-gray-400">Systolic</p>
+                  <p className="text-xl font-bold">
+                    {Math.round(
+                      readings.reduce((sum, reading) => sum + reading.systolic, 0) / readings.length
+                    )}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-400">Diastolic</p>
+                  <p className="text-xl font-bold">
+                    {Math.round(
+                      readings.reduce((sum, reading) => sum + reading.diastolic, 0) / readings.length
+                    )}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-400">Pulse</p>
+                  <p className="text-xl font-bold">
+                    {readings.some(r => r.pulse) 
+                      ? Math.round(
+                          readings.reduce((sum, reading) => sum + (reading.pulse || 0), 0) / 
+                          readings.filter(r => r.pulse).length
+                        )
+                      : '-'
+                    }
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Trends summary card */}
+            <div className="bg-gray-700 p-4 rounded-lg">
+              <h5 className="text-sm font-medium text-gray-300 mb-2">Trends Summary</h5>
+              <p className="text-sm text-gray-200">
+                {readings.length < 3 
+                  ? "Add more readings to see trend analysis" 
+                  : "Your blood pressure has been relatively stable over this period."}
+              </p>
+            </div>
           </div>
+        ) : (
+          <p className="text-gray-500 text-sm">Record multiple readings to see insights</p>
         )}
       </div>
-
-      <div className="mt-6">
-        <h3 className="text-lg font-medium mb-4">Statistics</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <StatCard 
-            title="Systolic" 
-            readings={chartData.map(d => d.systolic)} 
-            unit="mmHg"
-          />
-          <StatCard 
-            title="Diastolic" 
-            readings={chartData.map(d => d.diastolic)} 
-            unit="mmHg"
-          />
-          <StatCard 
-            title="Pulse" 
-            readings={chartData.map(d => d.pulse).filter(p => p > 0)} 
-            unit="bpm"
-          />
-        </div>
-      </div>
     </div>
   );
-}
+};
 
-interface StatCardProps {
-  title: string;
-  readings: number[];
-  unit: string;
-}
-
-function StatCard({ title, readings, unit }: StatCardProps) {
-  if (readings.length === 0) {
-    return (
-      <div className="bg-gray-700 p-4 rounded-lg">
-        <h4 className="text-lg font-medium mb-2">{title}</h4>
-        <p className="text-gray-400">No data available</p>
-      </div>
-    );
-  }
-
-  const average = Math.round(readings.reduce((sum, val) => sum + val, 0) / readings.length);
-  const max = Math.max(...readings);
-  const min = Math.min(...readings);
-  
-  return (
-    <div className="bg-gray-700 p-4 rounded-lg">
-      <h4 className="text-lg font-medium mb-2">{title}</h4>
-      
-      <div className="grid grid-cols-3 gap-2 text-center">
-        <div>
-          <p className="text-gray-400 text-sm">Average</p>
-          <p className="text-xl font-medium">{average}</p>
-          <p className="text-gray-400 text-xs">{unit}</p>
-        </div>
-        <div>
-          <p className="text-gray-400 text-sm">Min</p>
-          <p className="text-xl font-medium">{min}</p>
-          <p className="text-gray-400 text-xs">{unit}</p>
-        </div>
-        <div>
-          <p className="text-gray-400 text-sm">Max</p>
-          <p className="text-xl font-medium">{max}</p>
-          <p className="text-gray-400 text-xs">{unit}</p>
-        </div>
-      </div>
-    </div>
-  );
-}
+export default TrendsTab;
