@@ -1,15 +1,22 @@
-import { NextResponse } from 'next/server';
-
+import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/app/lib/prisma';
 
-// GET all readings
-export async function GET() {
+// GET route handler for fetching readings with pagination
+export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams;
+  const page = parseInt(searchParams.get('page') || '1');
+  const limit = parseInt(searchParams.get('limit') || '20');
+  const skip = (page - 1) * limit;
+
   try {
     const readings = await prisma.bPReading.findMany({
+      skip,
+      take: limit,
       orderBy: {
         measuredAt: 'desc',
       },
     });
+
     return NextResponse.json(readings);
   } catch (error) {
     console.error('Error fetching readings:', error);
@@ -20,28 +27,26 @@ export async function GET() {
   }
 }
 
-// POST a new reading
-export async function POST(request: Request) {
+// POST route handler for creating a new reading
+export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { systolic, diastolic, pulse, notes, measuredAt } = body;
+    const data = await request.json();
     
-    // Validate the data
-    if (!systolic || !diastolic) {
+    // Validate required fields
+    if (!data.systolic || !data.diastolic || !data.measuredAt) {
       return NextResponse.json(
-        { error: 'Systolic and diastolic values are required' },
+        { error: 'Missing required fields' },
         { status: 400 }
       );
     }
     
-    // Create the reading
     const reading = await prisma.bPReading.create({
       data: {
-        systolic: Number(systolic),
-        diastolic: Number(diastolic),
-        pulse: pulse ? Number(pulse) : null,
-        notes: notes || null,
-        measuredAt: measuredAt ? new Date(measuredAt) : new Date(),
+        systolic: data.systolic,
+        diastolic: data.diastolic,
+        pulse: data.pulse,
+        notes: data.notes,
+        measuredAt: new Date(data.measuredAt),
       },
     });
     
